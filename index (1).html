@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cronograma">
+<meta name="theme-color" content="#0d0f14">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Cronograma ENEM + TCC</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Karla:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14; --surface: #161920; --surface2: #1e2230;
+    --border: rgba(255,255,255,0.07); --text: #e8eaf0; --muted: #6b7280;
+    --enem: #f97316; --tcc: #38bdf8; --red: #a3e635;
+    --humanas: #fbbf24; --cursinho: #fb7185; --rest: #c084fc;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Karla', sans-serif; overflow: hidden; overscroll-behavior: none; }
+
+  .app { display: flex; flex-direction: column; height: 100dvh; }
+
+  /* TOP BAR */
+  .topbar { flex-shrink: 0; background: var(--bg); padding: calc(var(--safe-top) + 14px) 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; }
+  .topbar-title .o { color: var(--enem); } .topbar-title .b { color: var(--tcc); }
+  .topbar-badge { font-size: 10px; letter-spacing: 0.08em; color: var(--cursinho); background: rgba(251,113,133,0.1); border: 1px solid rgba(251,113,133,0.2); border-radius: 20px; padding: 3px 9px; white-space: nowrap; }
+
+  /* TAB BAR */
+  .tabbar { flex-shrink: 0; display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .tabbar::-webkit-scrollbar { display: none; }
+  .tab { flex: 1; min-width: 68px; padding: 10px 6px; text-align: center; font-size: 10px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; user-select: none; white-space: nowrap; }
+  .tab.active { color: var(--enem); border-bottom-color: var(--enem); }
+  .tab-icon { font-size: 1rem; display: block; margin-bottom: 2px; }
+
+  /* PAGES */
+  .pages { flex: 1; overflow: hidden; position: relative; }
+  .page { position: absolute; inset: 0; overflow-y: auto; padding: 16px 14px calc(var(--safe-bot) + 16px); display: none; -webkit-overflow-scrolling: touch; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
+  .card-head { padding: 13px 15px 11px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .card-head-left { display: flex; align-items: center; gap: 10px; }
+  .day-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.92rem; }
+  .card-sub { font-size: 11px; color: var(--muted); font-style: italic; }
+  .chevron { font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+  .card.open .chevron { transform: rotate(180deg); }
+  .card-body { display: none; padding: 10px; flex-direction: column; gap: 7px; }
+  .card.open .card-body { display: flex; }
+
+  /* BLOCKS */
+  .block { display: flex; gap: 9px; padding: 9px 11px; border-radius: 8px; border-left: 3px solid; align-items: flex-start; }
+  .block-enem     { border-color: var(--enem);     background: rgba(249,115,22,0.07); }
+  .block-tcc      { border-color: var(--tcc);      background: rgba(56,189,248,0.07); }
+  .block-red      { border-color: var(--red);      background: rgba(163,230,53,0.07); }
+  .block-humanas  { border-color: var(--humanas);  background: rgba(251,191,36,0.07); }
+  .block-cursinho { border-color: var(--cursinho); background: rgba(251,113,133,0.07); }
+  .block-rest     { border-color: var(--rest);     background: rgba(192,132,252,0.07); }
+  .block-divider  { border: none; background: none; padding: 1px 0; justify-content: center; }
+
+  .block-time { font-size: 10px; color: var(--muted); white-space: nowrap; min-width: 68px; padding-top: 2px; font-weight: 500; }
+  .block-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .block-sub { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; font-weight: 300; }
+
+  .pb { display: inline-block; font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
+  .pb-enem { background: rgba(249,115,22,0.15); color: var(--enem); }
+  .pb-tcc  { background: rgba(56,189,248,0.12); color: var(--tcc); }
+
+  .divider-text { font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); opacity: 0.4; }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+  .pill { display: flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 30px; border: 1px solid var(--border); font-size: 11px; font-weight: 500; background: var(--surface); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 14px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
+  .stat-n { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; line-height: 1; }
+  .stat-n.orange { color: var(--enem); }
+  .stat-n.blue   { color: var(--tcc); }
+  .stat-n.pink   { color: var(--cursinho); }
+  .stat-n.green  { color: var(--red); }
+  .stat-l { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+
+  /* GAUSS */
+  .gauss-box { background: var(--surface); border: 1px solid rgba(251,113,133,0.2); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  .gauss-title { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cursinho); margin-bottom: 12px; }
+  .gauss-day { margin-bottom: 12px; }
+  .gauss-day:last-child { margin-bottom: 0; }
+  .gauss-day-name { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--cursinho); margin-bottom: 4px; }
+  .gauss-item { font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .gauss-item b { color: var(--text); font-weight: 500; }
+
+  /* PHASES */
+  .phase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 10px; position: relative; overflow: hidden; }
+  .phase-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .p1::before { background: var(--enem); } .p2::before { background: var(--tcc); } .p3::before { background: var(--red); } .p4::before { background: var(--rest); }
+  .phase-num-bg { font-family: 'Syne', sans-serif; font-size: 3.2rem; font-weight: 800; opacity: 0.06; position: absolute; top: 6px; right: 12px; line-height: 1; }
+  .phase-period { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+  .p1 .phase-period { color: var(--enem); } .p2 .phase-period { color: var(--tcc); } .p3 .phase-period { color: var(--red); } .p4 .phase-period { color: var(--rest); }
+  .phase-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+  .phase-items { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .phase-items li { font-size: 12.5px; color: var(--muted); padding-left: 16px; position: relative; line-height: 1.4; }
+  .phase-items li::before { content: '→'; position: absolute; left: 0; font-size: 10px; top: 2px; opacity: 0.45; }
+
+  /* TIPS */
+  .tip-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 10px; }
+  .tip-icon { font-size: 1.4rem; margin-bottom: 8px; }
+  .tip-title { font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700; margin-bottom: 5px; }
+  .tip-text { font-size: 12.5px; color: var(--muted); line-height: 1.6; font-weight: 300; }
+
+  .sec { font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 16px 0 10px; }
+
+  /* INSTALL */
+  #install-banner { display: none; position: fixed; bottom: calc(var(--safe-bot) + 10px); left: 14px; right: 14px; background: var(--surface2); border: 1px solid rgba(249,115,22,0.3); border-radius: 14px; padding: 14px 16px; z-index: 100; align-items: center; gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  #install-banner.show { display: flex; }
+  .install-text { flex: 1; font-size: 13px; line-height: 1.4; }
+  .install-text b { color: var(--enem); }
+  .btn-install { background: var(--enem); color: var(--bg); border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .btn-dismiss { background: none; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; padding: 4px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="topbar-title"><span class="o">ENEM</span> + <span class="b">TCC</span></div>
+    <div class="topbar-badge">🎓 Gauss · Seg/Qua/Qui</div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active" onclick="showTab('home')"><span class="tab-icon">🏠</span>Início</div>
+    <div class="tab" onclick="showTab('semana')"><span class="tab-icon">📅</span>Semana</div>
+    <div class="tab" onclick="showTab('gauss')"><span class="tab-icon">🎓</span>Gauss</div>
+    <div class="tab" onclick="showTab('tcc')"><span class="tab-icon">🐍</span>TCC</div>
+    <div class="tab" onclick="showTab('dicas')"><span class="tab-icon">💡</span>Dicas</div>
+  </div>
+
+  <div class="pages">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="sec">Resumo</div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-n orange">2h</div>
+          <div class="stat-l">ENEM<br>prioridade</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n blue">2h</div>
+          <div class="stat-l">TCC<br>horas extras</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n pink">3×</div>
+          <div class="stat-l">Noites<br>no Gauss</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n green">2×</div>
+          <div class="stat-l">Redações<br>por semana</div>
+        </div>
+      </div>
+
+      <div class="sec">Legenda</div>
+      <div class="legend">
+        <div class="pill"><span class="dot" style="background:var(--enem)"></span>ENEM · Prioridade</div>
+        <div class="pill"><span class="dot" style="background:var(--red)"></span>Redação</div>
+        <div class="pill"><span class="dot" style="background:var(--humanas)"></span>Humanas</div>
+        <div class="pill"><span class="dot" style="background:var(--tcc)"></span>TCC · Extra</div>
+        <div class="pill"><span class="dot" style="background:var(--cursinho)"></span>Gauss</div>
+      </div>
+
+      <div class="sec">Hoje</div>
+      <div id="today-card"></div>
+    </div>
+
+    <!-- SEMANA -->
+    <div class="page" id="page-semana">
+      <div class="sec">Toque para expandir</div>
+
+      <div class="card" id="card-seg">
+        <div class="card-head" onclick="toggleCard('card-seg')">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:var(--cursinho)"></span>
+            <div><div class="card-title">Segunda-feira</div><div class="card-sub">Redação + Química → Gauss</div></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="block block-divider"><span class="divider-text">prioridade · manhã</span></div>
+          <div class="block block-red">
+            <span class="block-time">08h – 10h</span>
+            <div><div class="block-title">Redação <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Escrever 1 redação completa + repertório</div></div>
+          </div>
+          <div class="block block-enem">
+            <span class="block-time">10h – 12h</span>
+            <div><div class="block-title">Química <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Teoria + exercícios antes da aula</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">extra · tarde</span></div>
+          <div class="block block-tcc">
+            <span class="block-time">14h – 16h</span>
+            <div><div class="block-title">TCC — Python <span class="pb pb-tcc">EXTRA</span></div><div class="block-sub">Implementar, testar, debugar</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">noite · cursinho</span></div>
+          <div class="block block-cursinho">
+            <span class="block-time">19h – 22h</span>
+            <div><div class="block-title">🎓 Gauss</div><div class="block-sub">Redação (Nelson) · Química (Gabriel)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-ter">
+        <div class="card-head" onclick="toggleCard('card-ter')">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:var(--humanas)"></span>
+            <div><div class="card-title">Terça-feira</div><div class="card-sub">Humanas + TCC</div></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="block block-divider"><span class="divider-text">prioridade · manhã</span></div>
+          <div class="block block-humanas">
+            <span class="block-time">08h – 10h</span>
+            <div><div class="block-title">História / Sociologia <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Não coberto pelo Gauss</div></div>
+          </div>
+          <div class="block block-humanas">
+            <span class="block-time">10h – 12h</span>
+            <div><div class="block-title">Geografia / Filosofia <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Questões de provas anteriores</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">extra · tarde</span></div>
+          <div class="block block-tcc">
+            <span class="block-time">14h – 16h</span>
+            <div><div class="block-title">TCC — Python <span class="pb pb-tcc">EXTRA</span></div><div class="block-sub">Lógica principal, módulos</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-qua">
+        <div class="card-head" onclick="toggleCard('card-qua')">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:var(--cursinho)"></span>
+            <div><div class="card-title">Quarta-feira</div><div class="card-sub">Linguística + Física → Gauss</div></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="block block-divider"><span class="divider-text">prioridade · manhã</span></div>
+          <div class="block block-enem">
+            <span class="block-time">08h – 10h</span>
+            <div><div class="block-title">Análise Linguística <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Interpretação, gramática, literatura</div></div>
+          </div>
+          <div class="block block-enem">
+            <span class="block-time">10h – 12h</span>
+            <div><div class="block-title">Física <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Teoria + exercícios antes da aula</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">extra · tarde</span></div>
+          <div class="block block-tcc">
+            <span class="block-time">14h – 16h</span>
+            <div><div class="block-title">TCC — Python <span class="pb pb-tcc">EXTRA</span></div><div class="block-sub">Refatoração, testes, documentação</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">noite · cursinho</span></div>
+          <div class="block block-cursinho">
+            <span class="block-time">19h – 22h</span>
+            <div><div class="block-title">🎓 Gauss</div><div class="block-sub">An. Linguística (Thiago) · Física (William)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-qui">
+        <div class="card-head" onclick="toggleCard('card-qui')">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:var(--cursinho)"></span>
+            <div><div class="card-title">Quinta-feira</div><div class="card-sub">Biologia + Matemática → Gauss</div></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="block block-divider"><span class="divider-text">prioridade · manhã</span></div>
+          <div class="block block-enem">
+            <span class="block-time">08h – 10h</span>
+            <div><div class="block-title">Biologia <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Teoria + exercícios antes da aula</div></div>
+          </div>
+          <div class="block block-enem">
+            <span class="block-time">10h – 12h</span>
+            <div><div class="block-title">Matemática <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Exercícios antes da aula do Arthur</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">extra · tarde</span></div>
+          <div class="block block-tcc">
+            <span class="block-time">14h – 16h</span>
+            <div><div class="block-title">TCC — Python <span class="pb pb-tcc">EXTRA</span></div><div class="block-sub">Novas features, testes unitários</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">noite · cursinho</span></div>
+          <div class="block block-cursinho">
+            <span class="block-time">19h – 22h</span>
+            <div><div class="block-title">🎓 Gauss</div><div class="block-sub">Biologia (Rodrigão) · Matemática (Arthur)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-sex">
+        <div class="card-head" onclick="toggleCard('card-sex')">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:var(--humanas)"></span>
+            <div><div class="card-title">Sexta-feira</div><div class="card-sub">Humanas + Redação revisão</div></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="block block-divider"><span class="divider-text">prioridade · manhã</span></div>
+          <div class="block block-humanas">
+            <span class="block-time">08h – 10h</span>
+            <div><div class="block-title">Humanas — revisão <span class="pb pb-enem">ENEM</span></div><div class="block-sub">História, Geo, Filosofia, Sociologia</div></div>
+          </div>
+          <div class="block block-red">
+            <span class="block-time">10h – 12h</span>
+            <div><div class="block-title">Redação — Correção <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Revisar e reescrever a da segunda</div></div>
+          </div>
+          <div class="block block-divider"><span class="divider-text">extra · tarde</span></div>
+          <div class="block block-tcc">
+            <span class="block-time">14h – 16h</span>
+            <div><div class="block-title">TCC — Sprint da semana <span class="pb pb-tcc">EXTRA</span></div><div class="block-sub">Consolidar, planejar próxima semana</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-sab">
+        <div class="card-head" onclick="toggleCard('card-sab')">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:var(--enem)"></span>
+            <div><div class="card-title">Sábado</div><div class="card-sub">Simulado + TCC livre</div></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="block block-enem">
+            <span class="block-time">09h – 12h</span>
+            <div><div class="block-title">Simulado ENEM <span class="pb pb-enem">ENEM</span></div><div class="block-sub">Questões mistas das 4 áreas — cronometrado</div></div>
+          </div>
+          <div class="block block-tcc">
+            <span class="block-time">14h – 16h</span>
+            <div><div class="block-title">TCC — Sprint Livre <span class="pb pb-tcc">EXTRA</span></div><div class="block-sub">Avançar em qualquer gargalo</div></div>
+          </div>
+          <div class="block block-rest">
+            <span class="block-time">16h – 17h</span>
+            <div><div class="block-title">Revisão da semana</div><div class="block-sub">Anotar dúvidas, ajustar cronograma</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-dom">
+        <div class="card-head" onclick="toggleCard('card-dom')">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:var(--rest)"></span>
+            <div><div class="card-title">Domingo</div><div class="card-sub">Descanso 🔋</div></div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="card-body">
+          <div class="block block-rest">
+            <span class="block-time">Manhã</span>
+            <div><div class="block-title">🔋 Descanso total</div><div class="block-sub">Sem estudos obrigatórios</div></div>
+          </div>
+          <div class="block block-rest">
+            <span class="block-time">À tarde</span>
+            <div><div class="block-title">Revisão leve (opcional)</div><div class="block-sub">Reler anotações ou aula curta</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAUSS -->
+    <div class="page" id="page-gauss">
+      <div class="gauss-box">
+        <div class="gauss-title">🎓 Gauss Centro de Estudos</div>
+        <div class="gauss-day">
+          <div class="gauss-day-name">Segunda · 19h–22h</div>
+          <div class="gauss-item">19h–20h20 → <b>Redação (Nelson)</b></div>
+          <div class="gauss-item">20h20–20h40 → Intervalo</div>
+          <div class="gauss-item">20h40–22h → <b>Química (Gabriel)</b></div>
+        </div>
+        <div class="gauss-day">
+          <div class="gauss-day-name">Quarta · 19h–22h</div>
+          <div class="gauss-item">19h–20h20 → <b>Análise Linguística (Thiago)</b></div>
+          <div class="gauss-item">20h20–20h40 → Intervalo</div>
+          <div class="gauss-item">20h40–22h → <b>Física (William)</b></div>
+        </div>
+        <div class="gauss-day">
+          <div class="gauss-day-name">Quinta · 19h–22h</div>
+          <div class="gauss-item">19h–20h20 → <b>Biologia (Rodrigão)</b></div>
+          <div class="gauss-item">20h20–20h40 → Intervalo</div>
+          <div class="gauss-item">20h40–22h → <b>Matemática (Arthur)</b></div>
+        </div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🔁</div>
+        <div class="tip-title">Estude antes da aula</div>
+        <div class="tip-text">Você já chega no Gauss tendo estudado 2h da matéria do dia. A aula vira revisão — absorção muito maior.</div>
+      </div>
+    </div>
+
+    <!-- TCC -->
+    <div class="page" id="page-tcc">
+      <div class="sec">Macrofases — 4 meses (2h/dia extras)</div>
+      <div class="phase-card p1">
+        <div class="phase-num-bg">1</div>
+        <div class="phase-period">Mês 1</div>
+        <div class="phase-title">Estrutura Base</div>
+        <ul class="phase-items">
+          <li>Definir escopo e funcionalidades</li>
+          <li>Configurar ambiente Python</li>
+          <li>Estrutura de pastas e módulos</li>
+          <li>Primeiras funções implementadas</li>
+        </ul>
+      </div>
+      <div class="phase-card p2">
+        <div class="phase-num-bg">2</div>
+        <div class="phase-period">Mês 2</div>
+        <div class="phase-title">Desenvolvimento</div>
+        <ul class="phase-items">
+          <li>Completar lógica central</li>
+          <li>Testes unitários (pytest)</li>
+          <li>Integração entre módulos</li>
+          <li>Tratar erros e edge cases</li>
+        </ul>
+      </div>
+      <div class="phase-card p3">
+        <div class="phase-num-bg">3</div>
+        <div class="phase-period">Mês 3</div>
+        <div class="phase-title">Refinamento</div>
+        <ul class="phase-items">
+          <li>Refatorar e otimizar código</li>
+          <li>Documentação do projeto</li>
+          <li>Validação com orientador</li>
+          <li>Código funcional e estável ✓</li>
+        </ul>
+      </div>
+      <div class="phase-card p4">
+        <div class="phase-num-bg">4</div>
+        <div class="phase-period">Mês 4</div>
+        <div class="phase-title">Monografia</div>
+        <ul class="phase-items">
+          <li>Escrever introdução e referencial</li>
+          <li>Documentar metodologia</li>
+          <li>Resultados e discussão</li>
+          <li>Revisão final e entrega</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- DICAS -->
+    <div class="page" id="page-dicas">
+      <div class="sec">Para manter a consistência</div>
+      <div class="tip-card">
+        <div class="tip-icon">🥇</div>
+        <div class="tip-title">ENEM sempre primeiro</div>
+        <div class="tip-text">2h de matéria ENEM de manhã, sem exceção. O TCC entra só depois, como horas extras — nunca inverta essa ordem.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🔁</div>
+        <div class="tip-title">Reforço antes da aula</div>
+        <div class="tip-text">Nos dias com Gauss, você já chega na aula tendo estudado 2h da matéria. A aula vira revisão — absorção muito maior.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">✍️</div>
+        <div class="tip-title">Ciclo semanal de redação</div>
+        <div class="tip-text">Segunda escreve → aula do Nelson → sexta corrige e reescreve. Em 2 meses: 8+ redações treinadas.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🐍</div>
+        <div class="tip-title">TCC não para</div>
+        <div class="tip-text">2h de Python toda tarde = 10h por semana. Parece pouco, mas em 4 meses são ~160h de código. Suficiente.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🔋</div>
+        <div class="tip-title">Domingo é sagrado</div>
+        <div class="tip-text">Sem descanso, o rendimento cai no meio da semana. Domingo protegido é parte da estratégia.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="install-banner">
+  <div class="install-text">📲 <b>Instalar como app</b> no celular</div>
+  <button class="btn-install" id="btn-install">Instalar</button>
+  <button class="btn-dismiss" onclick="dismissBanner()">✕</button>
+</div>
+
+<script>
+  function showTab(id) {
+    const ids = ['home','semana','gauss','tcc','dicas'];
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ids[i] === id));
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
+  }
+
+  function toggleCard(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  const days = ['dom','seg','ter','qua','qui','sex','sab'];
+  const dayNames = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  const dayData = {
+    seg: { color: 'var(--cursinho)', focus: 'Redação + Química → Gauss', card: 'card-seg' },
+    ter: { color: 'var(--humanas)',  focus: 'Humanas + TCC', card: 'card-ter' },
+    qua: { color: 'var(--cursinho)', focus: 'Linguística + Física → Gauss', card: 'card-qua' },
+    qui: { color: 'var(--cursinho)', focus: 'Biologia + Matemática → Gauss', card: 'card-qui' },
+    sex: { color: 'var(--humanas)',  focus: 'Humanas + Redação revisão', card: 'card-sex' },
+    sab: { color: 'var(--enem)',     focus: 'Simulado + TCC livre', card: 'card-sab' },
+    dom: { color: 'var(--rest)',     focus: 'Descanso 🔋', card: 'card-dom' },
+  };
+
+  function buildTodayCard() {
+    const dow = new Date().getDay();
+    const key = days[dow];
+    const d = dayData[key];
+    document.getElementById('today-card').innerHTML = `
+      <div class="card" style="border-color:rgba(255,255,255,0.12)">
+        <div class="card-head" onclick="showTab('semana'); setTimeout(()=>{ toggleCard('${d.card}'); document.getElementById('${d.card}').scrollIntoView({behavior:'smooth'}); },100)">
+          <div class="card-head-left">
+            <span class="day-dot" style="background:${d.color}"></span>
+            <div><div class="card-title">${dayNames[dow]}</div><div class="card-sub">${d.focus}</div></div>
+          </div>
+          <span style="font-size:11px;color:var(--enem)">ver →</span>
+        </div>
+      </div>`;
+  }
+
+  buildTodayCard();
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferredPrompt = e;
+    document.getElementById('install-banner').classList.add('show');
+  });
+  document.getElementById('btn-install').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null; dismissBanner();
+  });
+  function dismissBanner() { document.getElementById('install-banner').classList.remove('show'); }
+  window.addEventListener('appinstalled', dismissBanner);
+
+  const dow = new Date().getDay();
+  setTimeout(() => toggleCard(dayData[days[dow]].card), 300);
+</script>
+</body>
+</html>
