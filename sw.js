@@ -1,9 +1,7 @@
-const CACHE_NAME = 'cronograma-v1';
-const ASSETS = [
-  './index.html',
-  './manifest.json'
-];
+const CACHE_NAME = 'cronograma-v4';
+const ASSETS = ['./index.html', './manifest.json'];
 
+// Install: cache assets
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
@@ -11,6 +9,7 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
+// Activate: delete ALL old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -20,8 +19,16 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// Fetch: network first, fallback to cache
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request)
+      .then(response => {
+        // Save fresh copy in cache
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
