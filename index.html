@@ -243,7 +243,7 @@
       <div id="today-card"></div>
 
       <div class="sec">Progresso Semanal</div>
-      <div id="weekly-progress"></div>
+      <div id="weekly-progress"><div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Carregando progresso...</div></div>
 
       <div class="sec">Checklist do dia</div>
       <div class="card" style="padding:14px 14px 16px">
@@ -258,7 +258,7 @@
           <div class="progress-label"><span id="progress-text">0 / 0 concluídos</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
         </div>
-        <div class="checklist" id="checklist"></div>
+        <div class="checklist" id="checklist"><div style="padding:12px;text-align:center;color:var(--muted);font-size:13px">Carregando tarefas...</div></div>
       </div>
     </div>
 
@@ -654,18 +654,44 @@
 
   const typeColors = { enem:'var(--enem)', tcc:'var(--tcc)', gauss:'var(--cursinho)', rest:'var(--rest)' };
 
-  // ── STORAGE ──
+  // ── STORAGE — tries localStorage → sessionStorage → memory ──
+  const memStore = {};
+  function safeGet(key) {
+    try { const v = localStorage.getItem(key); if(v!==null) return v; } catch {}
+    try { const v = sessionStorage.getItem(key); if(v!==null) return v; } catch {}
+    return memStore[key]||null;
+  }
+  function safeSet(key, val) {
+    let saved = false;
+    try { localStorage.setItem(key, val); saved=true; } catch {}
+    if(!saved) { try { sessionStorage.setItem(key, val); saved=true; } catch {} }
+    if(!saved) { memStore[key]=val; }
+  }
+  function safeRemove(key) {
+    try { localStorage.removeItem(key); } catch {}
+    try { sessionStorage.removeItem(key); } catch {}
+    delete memStore[key];
+  }
+  function safeKeys() {
+    try { return Object.keys(localStorage); } catch {}
+    try { return Object.keys(sessionStorage); } catch {}
+    return Object.keys(memStore);
+  }
   function todayKey() {
     const d = new Date();
     return `check_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
   }
-  function loadChecked() { try { return JSON.parse(localStorage.getItem(todayKey())||'[]'); } catch { return []; } }
+  function loadChecked() {
+    try { return JSON.parse(safeGet(todayKey())||'[]'); } catch { return []; }
+  }
   function saveChecked(arr) {
-    Object.keys(localStorage).filter(k => k.startsWith('check_') && k !== todayKey()).forEach(k => {
-      const p = k.split('_');
-      if (p.length===4 && (new Date()-new Date(+p[1],+p[2],+p[3]))/86400000 > 7) localStorage.removeItem(k);
-    });
-    localStorage.setItem(todayKey(), JSON.stringify(arr));
+    try {
+      safeKeys().filter(k => k.startsWith('check_') && k !== todayKey()).forEach(k => {
+        const p = k.split('_');
+        if (p.length===4 && (new Date()-new Date(+p[1],+p[2],+p[3]))/86400000 > 7) safeRemove(k);
+      });
+      safeSet(todayKey(), JSON.stringify(arr));
+    } catch(e) { console.warn('saveChecked error', e); }
   }
 
   // ── CHECKLIST ──
@@ -728,7 +754,7 @@
     mon.setDate(now.getDate()-(dow===0?6:dow-1)); mon.setHours(0,0,0,0); return mon;
   }
   function keyForDate(d){return `check_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;}
-  function getCheckedForDate(d){try{return JSON.parse(localStorage.getItem(keyForDate(d))||'[]');}catch{return[];}}
+  function getCheckedForDate(d){try{return JSON.parse(safeGet(keyForDate(d))||'[]');}catch{return[];}}
 
   function buildWeeklyProgress() {
     const monday=getWeekBounds(), today=new Date(); today.setHours(0,0,0,0);
@@ -860,12 +886,21 @@
     if(granted) scheduleNotifications();
   }
 
-  buildTodayCard();
-  buildWeeklyProgress();
-  buildChecklist();
-  initNotifications();
+  try { buildTodayCard(); } catch(e) { console.error('buildTodayCard', e); }
+  try { buildWeeklyProgress(); } catch(e) { console.error('buildWeeklyProgress', e); }
+  try { buildChecklist(); } catch(e) { console.error('buildChecklist', e); }
+  try { initNotifications(); } catch(e) { console.error('initNotifications', e); }
 
   if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+  // ── FORCE RE-RENDER on visibility change (when app resumes from background) ──
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      try { buildTodayCard(); } catch(e) {}
+      try { buildWeeklyProgress(); } catch(e) {}
+      try { buildChecklist(); } catch(e) {}
+    }
+  });
 
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').classList.add('show');});
