@@ -120,6 +120,66 @@
 
   .sec { font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 16px 0 10px; }
 
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .check-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    cursor: pointer; user-select: none; transition: opacity 0.2s;
+  }
+  .check-item.done { opacity: 0.45; }
+  .check-box {
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--muted);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: all 0.2s;
+  }
+  .check-item.done .check-box { background: var(--enem); border-color: var(--enem); }
+  .check-label { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.3; }
+  .check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
+  .check-time { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+  .progress-bar-wrap { margin-top: 14px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .progress-label span { color: var(--enem); font-weight: 600; }
+  .progress-bar { height: 5px; background: var(--surface2); border-radius: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--enem); border-radius: 10px; transition: width 0.3s ease; }
+
+  .today-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .today-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .today-sub { font-size: 11px; color: var(--muted); font-style: italic; }
+  .check-sub { font-size: 10.5px; color: var(--muted); font-weight: 300; margin-top: 1px; }
+  .reset-btn { font-size: 10px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
+
+  /* WEEKLY PROGRESS */
+  .week-progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 10px; }
+
+  .wp-total-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .wp-total-box { background: var(--surface2); border-radius: 10px; padding: 12px; text-align: center; }
+  .wp-total-n { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; line-height: 1; }
+  .wp-total-n.orange { color: var(--enem); }
+  .wp-total-n.blue   { color: var(--tcc); }
+  .wp-total-l { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+
+  /* day bar chart */
+  .day-bars { display: flex; align-items: flex-end; gap: 6px; height: 70px; margin-bottom: 8px; }
+  .day-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .day-bar-fill { width: 100%; border-radius: 5px 5px 0 0; min-height: 3px; transition: height 0.4s ease; position: relative; }
+  .day-bar-fill.today-bar { outline: 2px solid var(--enem); outline-offset: 1px; }
+  .day-bar-pct { font-size: 9px; color: var(--muted); }
+  .day-bar-name { font-size: 9.5px; color: var(--muted); font-weight: 500; }
+  .day-bar-name.today { color: var(--enem); font-weight: 700; }
+
+  /* subject breakdown */
+  .subject-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .subject-row { display: flex; align-items: center; gap: 10px; }
+  .subject-label { font-size: 11.5px; font-weight: 500; min-width: 90px; }
+  .subject-bar-wrap { flex: 1; background: var(--surface2); border-radius: 6px; height: 7px; overflow: hidden; }
+  .subject-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+  .subject-pct-label { font-size: 10px; color: var(--muted); min-width: 30px; text-align: right; }
+
+  .wp-divider { font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin: 14px 0 8px; opacity: 0.6; }
+
   /* INSTALL */
   #install-banner { display: none; position: fixed; bottom: calc(var(--safe-bot) + 10px); left: 14px; right: 14px; background: var(--surface2); border: 1px solid rgba(249,115,22,0.3); border-radius: 14px; padding: 14px 16px; z-index: 100; align-items: center; gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
   #install-banner.show { display: flex; }
@@ -180,6 +240,25 @@
 
       <div class="sec">Hoje</div>
       <div id="today-card"></div>
+
+      <div class="sec">Progresso Semanal</div>
+      <div id="weekly-progress"></div>
+
+      <div class="sec">Checklist do dia</div>
+      <div class="card" style="padding:14px 14px 16px">
+        <div class="today-header">
+          <div>
+            <div class="today-title" id="check-day-name">—</div>
+            <div class="today-sub" id="check-day-sub">—</div>
+          </div>
+          <button class="reset-btn" onclick="resetChecklist()">↺ resetar</button>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-label"><span id="progress-text">0 / 0 concluídos</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        </div>
+        <div class="checklist" id="checklist"></div>
+      </div>
     </div>
 
     <!-- SEMANA -->
@@ -488,6 +567,8 @@
   </div>
 </div>
 
+<button id="notif-btn" style="font-size:10px;background:none;border:none;color:var(--muted);cursor:pointer;padding:0">🔕 Notificações</button>
+
 <div id="install-banner">
   <div class="install-text">📲 <b>Instalar como app</b> no celular</div>
   <button class="btn-install" id="btn-install">Instalar</button>
@@ -495,35 +576,143 @@
 </div>
 
 <script>
+  // ── TABS ──
   function showTab(id) {
     const ids = ['home','semana','gauss','tcc','dicas'];
     document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ids[i] === id));
     document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
   }
+  function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
 
-  function toggleCard(id) {
-    document.getElementById(id).classList.toggle('open');
-  }
-
-  const days = ['dom','seg','ter','qua','qui','sex','sab'];
+  const days     = ['dom','seg','ter','qua','qui','sex','sab'];
   const dayNames = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
-  const dayData = {
-    seg: { color: 'var(--cursinho)', focus: 'Redação + Química → Gauss', card: 'card-seg' },
-    ter: { color: 'var(--humanas)',  focus: 'Humanas + TCC', card: 'card-ter' },
-    qua: { color: 'var(--cursinho)', focus: 'Linguística + Física → Gauss', card: 'card-qua' },
-    qui: { color: 'var(--cursinho)', focus: 'Biologia + Matemática → Gauss', card: 'card-qui' },
-    sex: { color: 'var(--humanas)',  focus: 'Humanas + Redação revisão', card: 'card-sex' },
-    sab: { color: 'var(--enem)',     focus: 'Simulado + TCC livre', card: 'card-sab' },
-    dom: { color: 'var(--rest)',     focus: 'Descanso 🔋', card: 'card-dom' },
+  const dayData  = {
+    seg: { color:'var(--cursinho)', focus:'Redação + Química → Gauss',     card:'card-seg', gauss:true  },
+    ter: { color:'var(--humanas)',  focus:'Humanas + TCC',                  card:'card-ter', gauss:false },
+    qua: { color:'var(--cursinho)', focus:'Linguística + Física → Gauss',  card:'card-qua', gauss:true  },
+    qui: { color:'var(--cursinho)', focus:'Biologia + Matemática → Gauss', card:'card-qui', gauss:true  },
+    sex: { color:'var(--humanas)',  focus:'Humanas + Redação revisão',      card:'card-sex', gauss:false },
+    sab: { color:'var(--enem)',     focus:'Simulado + TCC livre',           card:'card-sab', gauss:false },
+    dom: { color:'var(--rest)',     focus:'Descanso 🔋',                    card:'card-dom', gauss:false },
   };
 
+  const checklistData = {
+    seg: [
+      { id:'s1', label:'📝 Redação',           sub:'Escrever 1 redação completa',        time:'08h–10h',   type:'enem',  subject:'redacao'    },
+      { id:'s2', label:'⚗️ Química',            sub:'Teoria + exercícios',               time:'10h–12h',   type:'enem',  subject:'quimica'    },
+      { id:'s3', label:'🐍 TCC — Python',       sub:'Implementar, testar, debugar',      time:'14h–16h',   type:'tcc',   subject:'tcc'        },
+      { id:'s4', label:'🎓 Gauss · Redação',    sub:'Aula com Nelson',                   time:'19h–20h20', type:'gauss', subject:'redacao'    },
+      { id:'s5', label:'🎓 Gauss · Química',    sub:'Aula com Gabriel',                  time:'20h40–22h', type:'gauss', subject:'quimica'    },
+    ],
+    ter: [
+      { id:'t1', label:'🌍 Geografia',          sub:'Geopolítica, cartografia, biomas',  time:'08h–10h',   type:'enem',  subject:'geografia'  },
+      { id:'t2', label:'📚 História',           sub:'Brasil, mundo, sociologia',         time:'10h–12h',   type:'enem',  subject:'historia'   },
+      { id:'t3', label:'🐍 TCC — Python',       sub:'Lógica principal, módulos',         time:'14h–16h',   type:'tcc',   subject:'tcc'        },
+    ],
+    qua: [
+      { id:'q1', label:'📖 Linguagens',         sub:'Interpretação, gramática, lit.',    time:'08h–10h',   type:'enem',  subject:'linguagens' },
+      { id:'q2', label:'⚡ Física',             sub:'Teoria + exercícios',               time:'10h–12h',   type:'enem',  subject:'fisica'     },
+      { id:'q3', label:'🐍 TCC — Python',       sub:'Refatoração, testes, docs',         time:'14h–16h',   type:'tcc',   subject:'tcc'        },
+      { id:'q4', label:'🎓 Gauss · Linguagens', sub:'Análise Linguística com Thiago',   time:'19h–20h20', type:'gauss', subject:'linguagens' },
+      { id:'q5', label:'🎓 Gauss · Física',     sub:'Aula com William',                  time:'20h40–22h', type:'gauss', subject:'fisica'     },
+    ],
+    qui: [
+      { id:'u1', label:'🧬 Biologia',           sub:'Teoria + exercícios',               time:'08h–10h',   type:'enem',  subject:'biologia'   },
+      { id:'u2', label:'📐 Matemática',         sub:'Exercícios antes da aula',          time:'10h–12h',   type:'enem',  subject:'matematica' },
+      { id:'u3', label:'🐍 TCC — Python',       sub:'Novas features, testes',            time:'14h–16h',   type:'tcc',   subject:'tcc'        },
+      { id:'u4', label:'🎓 Gauss · Biologia',   sub:'Aula com Rodrigão',                 time:'19h–20h20', type:'gauss', subject:'biologia'   },
+      { id:'u5', label:'🎓 Gauss · Matemática', sub:'Aula com Arthur',                   time:'20h40–22h', type:'gauss', subject:'matematica' },
+    ],
+    sex: [
+      { id:'x1', label:'🗺️ Humanas',           sub:'História, Geo, Filosofia, Socio',   time:'08h–10h',   type:'enem',  subject:'humanas'    },
+      { id:'x2', label:'📝 Redação — correção', sub:'Corrigir e reescrever',             time:'10h–12h',   type:'enem',  subject:'redacao'    },
+      { id:'x3', label:'🐍 TCC — Python',       sub:'Sprint da semana',                  time:'14h–16h',   type:'tcc',   subject:'tcc'        },
+    ],
+    sab: [
+      { id:'b1', label:'📋 Simulado ENEM',      sub:'Questões mistas das 4 áreas',       time:'09h–12h',   type:'enem',  subject:'simulado'   },
+      { id:'b2', label:'🐍 TCC — Sprint',       sub:'Avançar gargalos do código',        time:'14h–16h',   type:'tcc',   subject:'tcc'        },
+      { id:'b3', label:'📊 Revisão da semana',  sub:'Anotar dúvidas, ajustar plano',     time:'16h–17h',   type:'rest',  subject:'revisao'    },
+    ],
+    dom: [
+      { id:'d1', label:'🔋 Descanso total',     sub:'Sem estudos obrigatórios',          time:'manhã',     type:'rest',  subject:'descanso'   },
+      { id:'d2', label:'📖 Revisão leve',       sub:'Opcional — reler anotações',        time:'tarde',     type:'rest',  subject:'revisao'    },
+    ],
+  };
+
+  const subjectMeta = {
+    redacao:    { label:'Redação',    color:'var(--red)'      },
+    quimica:    { label:'Química',    color:'#34d399'         },
+    fisica:     { label:'Física',     color:'var(--tcc)'      },
+    biologia:   { label:'Biologia',   color:'#4ade80'         },
+    matematica: { label:'Matemática', color:'var(--enem)'     },
+    linguagens: { label:'Linguagens', color:'var(--rest)'     },
+    geografia:  { label:'Geografia',  color:'var(--humanas)'  },
+    historia:   { label:'História',   color:'#fb923c'         },
+    humanas:    { label:'Humanas',    color:'var(--humanas)'  },
+    tcc:        { label:'TCC',        color:'var(--tcc)'      },
+    simulado:   { label:'Simulado',   color:'var(--enem)'     },
+  };
+
+  const typeColors = { enem:'var(--enem)', tcc:'var(--tcc)', gauss:'var(--cursinho)', rest:'var(--rest)' };
+
+  // ── STORAGE ──
+  function todayKey() {
+    const d = new Date();
+    return `check_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+  }
+  function loadChecked() { try { return JSON.parse(localStorage.getItem(todayKey())||'[]'); } catch { return []; } }
+  function saveChecked(arr) {
+    Object.keys(localStorage).filter(k => k.startsWith('check_') && k !== todayKey()).forEach(k => {
+      const p = k.split('_');
+      if (p.length===4 && (new Date()-new Date(+p[1],+p[2],+p[3]))/86400000 > 7) localStorage.removeItem(k);
+    });
+    localStorage.setItem(todayKey(), JSON.stringify(arr));
+  }
+
+  // ── CHECKLIST ──
+  function buildChecklist() {
+    const dow = new Date().getDay(), key = days[dow];
+    const items = checklistData[key]||[], checked = loadChecked();
+    document.getElementById('check-day-name').textContent = dayNames[dow];
+    document.getElementById('check-day-sub').textContent  = dayData[key]?.focus||'';
+    const container = document.getElementById('checklist');
+    container.innerHTML = '';
+    items.forEach(item => {
+      const done = checked.includes(item.id);
+      const el = document.createElement('div');
+      el.className = 'check-item'+(done?' done':'');
+      el.innerHTML = `
+        <div class="check-box" style="${done?'':'border-color:'+typeColors[item.type]}">${done?'✓':''}</div>
+        <div style="flex:1;min-width:0">
+          <div class="check-label">${item.label}</div>
+          <div class="check-sub">${item.sub}</div>
+        </div>
+        <div class="check-time">${item.time}</div>`;
+      el.addEventListener('click', () => toggleCheck(item.id));
+      container.appendChild(el);
+    });
+    updateProgress(items, checked);
+  }
+
+  function toggleCheck(id) {
+    const c=loadChecked(), i=c.indexOf(id);
+    if(i===-1) c.push(id); else c.splice(i,1);
+    saveChecked(c); buildChecklist(); buildWeeklyProgress();
+  }
+  function resetChecklist() { saveChecked([]); buildChecklist(); buildWeeklyProgress(); }
+  function updateProgress(items, checked) {
+    const total=items.length, done=checked.filter(id=>items.some(i=>i.id===id)).length;
+    const pct=total>0?Math.round((done/total)*100):0;
+    document.getElementById('progress-text').textContent=`${done} / ${total} concluídos`;
+    document.getElementById('progress-fill').style.width=pct+'%';
+  }
+
+  // ── TODAY CARD ──
   function buildTodayCard() {
-    const dow = new Date().getDay();
-    const key = days[dow];
-    const d = dayData[key];
-    document.getElementById('today-card').innerHTML = `
+    const dow=new Date().getDay(), key=days[dow], d=dayData[key];
+    document.getElementById('today-card').innerHTML=`
       <div class="card" style="border-color:rgba(255,255,255,0.12)">
-        <div class="card-head" onclick="showTab('semana'); setTimeout(()=>{ toggleCard('${d.card}'); document.getElementById('${d.card}').scrollIntoView({behavior:'smooth'}); },100)">
+        <div class="card-head" onclick="showTab('semana');setTimeout(()=>{toggleCard('${d.card}');document.getElementById('${d.card}').scrollIntoView({behavior:'smooth'});},100)">
           <div class="card-head-left">
             <span class="day-dot" style="background:${d.color}"></span>
             <div><div class="card-title">${dayNames[dow]}</div><div class="card-sub">${d.focus}</div></div>
@@ -533,26 +722,164 @@
       </div>`;
   }
 
-  buildTodayCard();
+  // ── WEEKLY PROGRESS ──
+  const taskHours={enem:2,tcc:2,gauss:1.5,rest:0};
+  function getWeekBounds() {
+    const now=new Date(),dow=now.getDay(),mon=new Date(now);
+    mon.setDate(now.getDate()-(dow===0?6:dow-1)); mon.setHours(0,0,0,0); return mon;
+  }
+  function keyForDate(d){return `check_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;}
+  function getCheckedForDate(d){try{return JSON.parse(localStorage.getItem(keyForDate(d))||'[]');}catch{return[];}}
 
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  function buildWeeklyProgress() {
+    const monday=getWeekBounds(), today=new Date(); today.setHours(0,0,0,0);
+    const shortNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+    const dayKeys=['seg','ter','qua','qui','sex','sab','dom'];
+    let totalEnem=0, totalTcc=0;
+    const dayStats=[], subjectDone={}, subjectTotal={};
+
+    for(let i=0;i<7;i++){
+      const d=new Date(monday); d.setDate(monday.getDate()+i);
+      const key=dayKeys[i], items=checklistData[key]||[];
+      const checked=getCheckedForDate(d);
+      const isToday=d.getTime()===today.getTime(), isPast=d<=today;
+      const doneItems=items.filter(it=>checked.includes(it.id));
+      const pct=items.length>0?Math.round((doneItems.length/items.length)*100):0;
+      doneItems.forEach(it=>{
+        if(it.type==='enem') totalEnem+=taskHours.enem;
+        if(it.type==='tcc')  totalTcc+=taskHours.tcc;
+        if(it.type==='gauss') totalEnem+=taskHours.gauss;
+      });
+      items.forEach(it=>{ if(it.subject&&isPast) subjectTotal[it.subject]=(subjectTotal[it.subject]||0)+1; });
+      doneItems.forEach(it=>{ if(it.subject) subjectDone[it.subject]=(subjectDone[it.subject]||0)+1; });
+      dayStats.push({name:shortNames[i],pct,done:doneItems.length,total:items.length,isToday});
+    }
+
+    const maxPct=Math.max(...dayStats.map(d=>d.pct),1);
+    const weekSubjects=[...new Set(dayKeys.flatMap(k=>(checklistData[k]||[]).map(it=>it.subject).filter(Boolean)))]
+      .filter(s=>s!=='descanso'&&s!=='revisao');
+
+    document.getElementById('weekly-progress').innerHTML=`
+      <div class="week-progress-card">
+        <div class="wp-total-row">
+          <div class="wp-total-box"><div class="wp-total-n orange">${Math.round(totalEnem)}h</div><div class="wp-total-l">ENEM esta semana</div></div>
+          <div class="wp-total-box"><div class="wp-total-n blue">${Math.round(totalTcc)}h</div><div class="wp-total-l">TCC esta semana</div></div>
+        </div>
+        <div class="wp-divider">Tarefas por dia</div>
+        <div class="day-bars">
+          ${dayStats.map(d=>`
+            <div class="day-bar-col">
+              <div class="day-bar-pct">${d.total>0?d.pct+'%':'—'}</div>
+              <div class="day-bar-fill ${d.isToday?'today-bar':''}"
+                style="height:${Math.max((d.pct/maxPct)*52,d.pct>0?4:0)}px;
+                       background:${d.pct===100?'var(--red)':d.pct>0?'var(--enem)':'var(--surface2)'}"></div>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:4px">
+          ${dayStats.map(d=>`
+            <div style="flex:1;text-align:center">
+              <div class="day-bar-name ${d.isToday?'today':''}">${d.name}</div>
+              <div style="font-size:9px;color:var(--muted)">${d.done}/${d.total}</div>
+            </div>`).join('')}
+        </div>
+        <div class="wp-divider">% por matéria</div>
+        <div class="subject-rows">
+          ${weekSubjects.map(s=>{
+            const meta=subjectMeta[s]||{label:s,color:'var(--muted)'};
+            const tot=subjectTotal[s]||0, don=subjectDone[s]||0;
+            const pct=tot>0?Math.round((don/tot)*100):0;
+            return `<div class="subject-row">
+              <div class="subject-label" style="color:${meta.color}">${meta.label}</div>
+              <div class="subject-bar-wrap"><div class="subject-bar-fill" style="width:${pct}%;background:${meta.color}"></div></div>
+              <div class="subject-pct-label">${pct}%</div>
+            </div>`;}).join('')}
+        </div>
+      </div>`;
+  }
+
+  // ── NOTIFICATIONS ──
+  const motivations=[
+    '💪 ENEM — cada hora conta!',
+    '🎯 Foco no processo, o resultado vem depois.',
+    '🔥 Você já começou — isso é o mais difícil.',
+    '📚 Consistência bate intensidade todo dia.',
+    '🏆 O ENEM é uma maratona, não um sprint.',
+    '⚡ Cada exercício resolvido é um ponto a mais.',
+    '🐍 TCC + ENEM juntos. Você consegue!',
+    '🌅 Mais um dia, mais um passo. Vai lá!',
+    '💡 Dúvida de hoje = acerto de amanhã.',
+    '🎓 Você está construindo seu futuro agora.',
+  ];
+
+  async function requestNotifications(){
+    if(!('Notification' in window)) return false;
+    if(Notification.permission==='granted') return true;
+    if(Notification.permission==='denied') return false;
+    return (await Notification.requestPermission())==='granted';
+  }
+
+  function sendNotif(title,body){
+    if(Notification.permission!=='granted') return;
+    new Notification(title,{body,icon:'icon-192.png',badge:'icon-192.png'});
+  }
+
+  function scheduleNotifications(){
+    if(Notification.permission!=='granted') return;
+    const now=new Date(), dow=now.getDay(), key=days[dow], d=dayData[key];
+    const motiv=motivations[Math.floor(Math.random()*motivations.length)];
+    const slots=[
+      {h:7,  m:0,  fn:()=>{ const items=checklistData[key]||[]; sendNotif('☀️ Bom dia! Resumo do dia',`${dayNames[dow]}: ${items.length} tarefas · ${d?.focus}`); }},
+      {h:8,  m:0,  fn:()=>sendNotif('📚 Hora de estudar!',`Bloco 1 — 08h às 10h · ${motiv}`)},
+      {h:10, m:0,  fn:()=>sendNotif('⏰ Bloco 2 começando','10h às 12h — mantenha o foco! 🎯')},
+      {h:14, m:0,  fn:()=>sendNotif('🐍 Hora do TCC!','14h às 16h — Python time. Bora codar!')},
+      ...(d?.gauss?[{h:18,m:50,fn:()=>sendNotif('🎓 Gauss em 10 minutos!','Prepare seu material — aula às 19h!')}]:[]),
+      {h:22, m:30, fn:()=>{
+        const items=checklistData[key]||[], checked=loadChecked();
+        const done=checked.filter(id=>items.some(i=>i.id===id)).length, pending=items.length-done;
+        if(pending>0) sendNotif('📊 Progresso do dia',`Concluído: ${done}/${items.length} · ${pending} tarefa${pending>1?'s':''} pendente${pending>1?'s':''}!`);
+        else if(items.length>0) sendNotif('🏆 Dia completo!',`Todas as ${items.length} tarefas concluídas! 🎉`);
+      }},
+    ];
+    slots.forEach(s=>{
+      const t=new Date(); t.setHours(s.h,s.m,0,0);
+      const diff=t-now;
+      if(diff>0&&diff<86400000) setTimeout(s.fn,diff);
+    });
+  }
+
+  async function initNotifications(){
+    const granted=await requestNotifications();
+    const btn=document.getElementById('notif-btn');
+    if(btn){
+      btn.textContent=granted?'🔔 Notificações ativas':'🔕 Ativar notificações';
+      btn.style.color=granted?'var(--red)':'var(--muted)';
+      btn.onclick=async()=>{
+        const g=await requestNotifications();
+        if(g){scheduleNotifications();btn.textContent='🔔 Notificações ativas';btn.style.color='var(--red)';}
+      };
+    }
+    if(granted) scheduleNotifications();
+  }
+
+  buildTodayCard();
+  buildWeeklyProgress();
+  buildChecklist();
+  initNotifications();
+
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
   let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault(); deferredPrompt = e;
-    document.getElementById('install-banner').classList.add('show');
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').classList.add('show');});
+  document.getElementById('btn-install').addEventListener('click',async()=>{
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt(); await deferredPrompt.userChoice;
+    deferredPrompt=null; dismissBanner();
   });
-  document.getElementById('btn-install').addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null; dismissBanner();
-  });
-  function dismissBanner() { document.getElementById('install-banner').classList.remove('show'); }
-  window.addEventListener('appinstalled', dismissBanner);
+  function dismissBanner(){document.getElementById('install-banner').classList.remove('show');}
+  window.addEventListener('appinstalled',dismissBanner);
 
-  const dow = new Date().getDay();
-  setTimeout(() => toggleCard(dayData[days[dow]].card), 300);
+  const dow=new Date().getDay();
+  setTimeout(()=>toggleCard(dayData[days[dow]].card),300);
 </script>
 </body>
 </html>
